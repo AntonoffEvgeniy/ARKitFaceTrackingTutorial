@@ -14,12 +14,21 @@ private let planeHeight: CGFloat = 0.06
 private let nodeYPosition: Float = 0.022
 private let cellIdentifier = "GlassesCollectionViewCell"
 private let glassesCount = 4
+private let animationDuration: TimeInterval = 0.25
 
 class ViewController: UIViewController {
     @IBOutlet weak var sceneView: ARSCNView!
+    @IBOutlet weak var glassesView: UIView!
     @IBOutlet weak var collectionView: UICollectionView!
+    @IBOutlet weak var collectionBottomConstraint: NSLayoutConstraint!
     
     private var glassesPlane: SCNPlane = SCNPlane(width: planeWidth, height: planeHeight)
+    
+    private var isCollecionOpened = false {
+        didSet {
+            updateCollectionPosition()
+        }
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -49,11 +58,25 @@ class ViewController: UIViewController {
     private func setupCollectionView() {
         collectionView.dataSource = self
         collectionView.delegate = self
+        collectionBottomConstraint.constant = -glassesView.bounds.size.height
     }
     
     private func updateGlasses(with index: Int) {
         let imageName = "glasses\(index)"
         glassesPlane.firstMaterial?.diffuse.contents = UIImage(named: imageName)
+    }
+    
+    private func updateCollectionPosition() {
+        collectionBottomConstraint.constant = isCollecionOpened ? 0 : -glassesView.bounds.size.height
+        UIView.animate(withDuration: animationDuration) {
+            self.view.layoutIfNeeded()
+        }
+    }
+    
+    // MARK: - Actions
+    
+    @IBAction func collectionDidTap(_ sender: UIButton) {
+        isCollecionOpened = !isCollecionOpened
     }
 }
 
