@@ -12,9 +12,14 @@ import ARKit
 private let planeWidth: CGFloat = 0.13
 private let planeHeight: CGFloat = 0.06
 private let nodeYPosition: Float = 0.022
+private let cellIdentifier = "GlassesCollectionViewCell"
+private let glassesCount = 4
 
 class ViewController: UIViewController {
     @IBOutlet weak var sceneView: ARSCNView!
+    @IBOutlet weak var collectionView: UICollectionView!
+    
+    private var glassesPlane: SCNPlane = SCNPlane(width: planeWidth, height: planeHeight)
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -24,6 +29,8 @@ class ViewController: UIViewController {
         }
         
         sceneView.delegate = self
+        
+        setupCollectionView()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -38,6 +45,16 @@ class ViewController: UIViewController {
         
         sceneView.session.pause()
     }
+    
+    private func setupCollectionView() {
+        collectionView.dataSource = self
+        collectionView.delegate = self
+    }
+    
+    private func updateGlasses(with index: Int) {
+        let imageName = "glasses\(index)"
+        glassesPlane.firstMaterial?.diffuse.contents = UIImage(named: imageName)
+    }
 }
 
 extension ViewController: ARSCNViewDelegate {
@@ -50,9 +67,8 @@ extension ViewController: ARSCNViewDelegate {
         let faceNode = SCNNode(geometry: faceGeometry)
         faceNode.geometry?.firstMaterial?.transparency = 0
         
-        let glassesPlane = SCNPlane(width: planeWidth, height: planeHeight)
         glassesPlane.firstMaterial?.isDoubleSided = true
-        glassesPlane.firstMaterial?.diffuse.contents = UIImage(named: "glasses")
+        updateGlasses(with: 0)
         
         let glassesNode = SCNNode()
         glassesNode.position.z = faceNode.boundingBox.max.z * 3 / 4
@@ -70,6 +86,24 @@ extension ViewController: ARSCNViewDelegate {
         }
         
         faceGeometry.update(from: faceAnchor.geometry)
+    }
+}
+
+extension ViewController: UICollectionViewDataSource, UICollectionViewDelegate {
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return glassesCount
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellIdentifier, for: indexPath) as! GlassesCollectionViewCell
+        let imageName = "glasses\(indexPath.row)"
+        cell.setup(with: imageName)
+        
+        return cell
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        updateGlasses(with: indexPath.row)
     }
 }
 
