@@ -78,6 +78,11 @@ class ViewController: UIViewController {
     @IBAction func collectionDidTap(_ sender: UIButton) {
         isCollecionOpened = !isCollecionOpened
     }
+    
+    @IBAction func sceneViewDidTap(_ sender: UITapGestureRecognizer) {
+        isCollecionOpened = false
+    }
+    
 }
 
 extension ViewController: ARSCNViewDelegate {
