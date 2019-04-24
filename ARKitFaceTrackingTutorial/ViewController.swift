@@ -12,6 +12,8 @@ import ARKit
 private let planeWidth: CGFloat = 0.13
 private let planeHeight: CGFloat = 0.06
 private let nodeYPosition: Float = 0.022
+private let minPositionDistance: Float = 0.0025
+private let minScaling: CGFloat = 0.025
 private let cellIdentifier = "GlassesCollectionViewCell"
 private let glassesCount = 4
 private let animationDuration: TimeInterval = 0.25
@@ -28,7 +30,10 @@ class ViewController: UIViewController {
     @IBOutlet weak var collectionButton: UIButton!
     @IBOutlet weak var calibrationButton: UIButton!
     
-    private var glassesPlane: SCNPlane = SCNPlane(width: planeWidth, height: planeHeight)
+    private let glassesPlane = SCNPlane(width: planeWidth, height: planeHeight)
+    private let glassesNode = SCNNode()
+    
+    private var scaling: CGFloat = 1
     
     private var isCollecionOpened = false {
         didSet {
@@ -99,6 +104,11 @@ class ViewController: UIViewController {
         }
     }
     
+    private func updateSize() {
+        glassesPlane.width = scaling * planeWidth
+        glassesPlane.height = scaling * planeHeight
+    }
+    
     // MARK: - Actions
     
     @IBAction func collectionDidTap(_ sender: UIButton) {
@@ -112,6 +122,40 @@ class ViewController: UIViewController {
     @IBAction func sceneViewDidTap(_ sender: UITapGestureRecognizer) {
         isCollecionOpened = false
         isCalibrationOpened = false
+    }
+    
+    @IBAction func upDidTap(_ sender: UIButton) {
+        glassesNode.position.y += minPositionDistance
+    }
+    
+    @IBAction func downDidTap(_ sender: UIButton) {
+        glassesNode.position.y -= minPositionDistance
+    }
+    
+    @IBAction func leftDidTap(_ sender: UIButton) {
+        glassesNode.position.x -= minPositionDistance
+    }
+    
+    @IBAction func rightDidTap(_ sender: UIButton) {
+        glassesNode.position.x += minPositionDistance
+    }
+    
+    @IBAction func farDidTap(_ sender: UIButton) {
+        glassesNode.position.z += minPositionDistance
+    }
+    
+    @IBAction func closerDidTap(_ sender: UIButton) {
+        glassesNode.position.z -= minPositionDistance
+    }
+    
+    @IBAction func biggerDidTap(_ sender: UIButton) {
+        scaling += minScaling
+        updateSize()
+    }
+    
+    @IBAction func smallerDidTap(_ sender: UIButton) {
+        scaling -= minScaling
+        updateSize()
     }
 }
 
@@ -128,7 +172,6 @@ extension ViewController: ARSCNViewDelegate {
         glassesPlane.firstMaterial?.isDoubleSided = true
         updateGlasses(with: 0)
         
-        let glassesNode = SCNNode()
         glassesNode.position.z = faceNode.boundingBox.max.z * 3 / 4
         glassesNode.position.y = nodeYPosition
         glassesNode.geometry = glassesPlane
